@@ -1,6 +1,6 @@
 # Dadu Agent
 
-**一个会反思、会追问、会动手的个性化 AI Agent 框架**
+**一个具备反思能力、主动追问能力与自主执行能力的个性化 AI Agent 框架**
 
 *A personalized AI agent framework that reflects, clarifies, and gets things done.*
 
@@ -10,7 +10,7 @@
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
 ![uv](https://img.shields.io/badge/uv-package%20manager-DE5FE9)
 
-Dadu Agent 是一个基于 **LangChain + LangGraph** 构建的全栈 AI 智能体项目：对话模型即插即用（默认 DeepSeek，可接入任意符合 OpenAI 协议的 LLM）、Chroma 为向量库、DashScope 为嵌入模型，内置 **7 个工具、3 个中间件、完整的 RAG 管线和双模式文件管理安全体系**。它既可以在终端里作为会话式 REPL 使用，也附带一个 React 实时聊天界面——支持 WebSocket 流式输出、工具调用可视化和浏览器内的"Agent 向你提问"交互。
+Dadu Agent 是一个基于 **LangChain + LangGraph** 构建的全栈 AI 智能体项目。其对话模型支持即插即用（默认 DeepSeek，可接入任意符合 OpenAI 协议的 LLM），向量数据库使用 Chroma，嵌入模型采用 DashScope。项目内置 **7 个工具、3 个中间件、完整的 RAG 管线以及双模式文件管理安全体系**。它既可以在终端中作为会话式 REPL 使用，也附带一个 React 实时聊天界面——支持 WebSocket 流式输出、工具调用可视化以及浏览器内的 Agent 主动澄清交互。
 
 <details>
 <summary>🇬🇧 English Introduction</summary>
@@ -21,15 +21,15 @@ Dadu Agent is a full-stack AI agent framework built on **LangChain + LangGraph**
 
 ---
 
-## 📸 界面预览
+## 界面预览
 
 ![Dadu Agent 主界面](README_material/chat_page.png)
 
 > 左侧会话列表支持搜索与多会话管理，一键创建新会话，即刻开始与 Agent 对话。
 
-## ✨ 核心特色
+## 核心特色
 
-### 🤖 开箱即用的 7 工具链
+### 开箱即用的 7 工具链
 
 | 工具 | 能力 |
 |---|---|
@@ -41,9 +41,9 @@ Dadu Agent is a full-stack AI agent framework built on **LangChain + LangGraph**
 | `file_manage` | 9 合 1 文件管理（读/写/追加/删/建目录/列/查/搜） |
 | `ask_for_answer` | 主动向用户澄清疑问 |
 
-系统提示词内置"场景—工具匹配表"与降级链（本地 RAG → 联网搜索），并强制来源标注（🔍 网络搜索 / 📚 本地知识库 / 🧮 计算推导），严禁在需要精确计算时心算。
+系统提示词内置"场景—工具匹配表"与降级链（本地 RAG → 联网搜索），并强制来源标注（网络搜索 / 本地知识库 / 计算推导），严禁在需要精确计算时心算。
 
-### 🪞 会写"哲学理解"的反思笔记本
+### 会写"哲学理解"的反思笔记本
 
 每次涉及工具调用的对话结束后，`@after_agent` 中间件会自动提醒 Agent 把经验写入反思笔记——即使任务顺利完成，也值得记录"这次为什么做对了"。每条反思包含**错误现象、解决方案、哲学理解**三个必填字段，支持 fatal/high/medium/low 严重度分级与标签，存入独立的 Chroma 集合，可被后续任务**语义检索**复用。Agent 由此拥有了可积累、可回查的长期记忆。
 
@@ -51,11 +51,11 @@ Web 端新增"设置 → 反思笔记"面板：可按严重度筛选、展开 Ma
 
 <img src="README_material/reflection_panel.png" width="720" alt="反思笔记 Web 面板">
 
-### ❓ 95% 置信度主动澄清
+### 95% 置信度主动澄清
 
 当 Agent 对需求的理解度不足 95% 时，会调用 `ask_for_answer` 一次一个精准提问（"你倾向于 A 方案还是 B 方案？"），而不是凭猜测硬答。在 Web 端，这个原本属于终端的确认流程被无缝桥接到浏览器——Agent 弹出提问框，用户点击回答，5 分钟无响应自动视为拒绝。
 
-### 📁 双模式文件管理 + 多层安全管线
+### 双模式文件管理 + 多层安全管线
 
 - **Manual 模式**：读操作自由，写/删/建目录必须经用户确认后携带 `--approved` 重试；
 - **Auto 模式**：在安全边界内自由 CRUD，禁止删除目录、禁止触碰系统路径。
@@ -66,13 +66,13 @@ Web 端新增"设置 → 反思笔记"面板：可按严重度筛选、展开 Ma
 
 所有操作流经同一条安全管线：路径穿越阻断 → glob 黑名单（`.env`/`.git`/`Chromadb` 等）→ 写入扩展名白名单 → 1MB 读 / 5MB 写限额 → 目录深度限制，且全程留痕于独立日志。
 
-### 📚 有性格的 RAG 知识库
+### 有性格的 RAG 知识库
 
 拖拽 `.txt` / `.md` / `.docx` / 代码文件等（扩展名列表见 `config/RagConfig.yml` 的 `support_extensions`）到设置面板即可入库：先由 LLM 按语义边界切分（以 `|` 为界，绝不断在词语或从句中间），再递归细分、MD5 去重后写入 Chroma；大文件走懒加载批处理，不爆内存。检索摘要遵循固定四段式结构——**核心结论 → 关键信息点 → 矛盾与存疑 → 信息缺口**，并禁用"可能/大概/或许"等含糊词。用提示词原文的话说：
 
 > 凡下断言，必溯其源；凡遇矛盾，必列双方；凡存缺口，必以明告。
 
-### 🧩 模型即插即用（任意 OpenAI 协议）
+### 模型即插即用（任意 OpenAI 协议）
 
 对话底座不再绑定 DeepSeek。打开 **设置 → 模型设置 → 添加模型**，填入 **API 地址（base_url）、API Key、模型名**，即可接入任何符合 OpenAI 协议的大模型（OpenAI、Ollama、vLLM、各类中转网关……）。注册表支持多模型管理与一键切换：
 
@@ -81,19 +81,19 @@ Web 端新增"设置 → 反思笔记"面板：可按严重度筛选、展开 Ma
 - 密钥安全：模型列表只返回掩码 key（如 `sk-****test`），编辑时留空 = 保留原 key，`config/ModelConfig.yml` 已 gitignore；
 - 切换模型自动重建模型单例并清理会话缓存，新会话立即生效（已打开的对话刷新后生效）。
 
-### 💬 会话持久化与自动标题
+### 会话持久化与自动标题
 
 每个会话以 JSONL 落盘，支持多会话创建/切换/删除；首轮对话后由模型自动生成 ≤20 字的中文标题（如"Python爬虫脚本编写"）。流式输出带历史清洗与失败回滚——上游模型报错时会自动恢复到最近一个可用快照，不产生半截对话。
 
-### ⏰ 定时清理上传文件
+### 定时清理上传文件
 
 服务器启动时会开启一个 asyncio 后台任务，按 `config/FileManageConfig.yml` 中 `uploads_cleanup_interval_days` 的间隔扫描 `uploads/` 目录，删除超过 `uploads_cleanup_retention_days` 未被修改的临时附件。知识库文件受 `file_record.jsonl` 保护，不会被误删。这样 Agent 与用户生成的大量临时文件不会无限堆积，而 RAG 入库的源文件始终安全。
 
-### 🌐 Web 端实时交互
+### Web 端实时交互
 
 React 单页应用通过 WebSocket 接收逐字流式回复，工具调用以可展开的 chip 实时呈现（`rag_summarize 已执行`、`file_manage 已执行`…），Agent 回复完整渲染 Markdown 表格、代码块与流程图。当 Agent 使用 `todo` 工具拆解任务时，聊天界面会实时渲染**待办清单面板**——进度条、状态图标、完成项划线，复杂任务进度一目了然。WebSocket 并发泵还让"停止"按钮与 `ask_for_answer` 提问在回复中途即可被响应，不再等到整轮结束。
 
-## 🎬 对话演示
+## 对话演示
 
 <details>
 <summary><b>点击查看完整对话示例</b> —— 编写豆瓣 Top250 爬虫，并连续两轮迭代增强（重试机制 → 冷却复活）</summary>
@@ -106,7 +106,7 @@ Agent 先查知识库与反思笔记，再调用 `file_manage` 写文件、读�
 
 </details>
 
-## 🏗 架构总览
+## 架构总览
 
 ```mermaid
 graph TD
@@ -140,7 +140,7 @@ graph TD
 └── vector_uploader_service/  # RAG 摄取（LLM 切分 + MD5 去重）与检索摘要
 ```
 
-## 🚀 快速开始
+## 快速开始
 
 **前置要求**：Python ≥ 3.13、[`uv`](https://docs.astral.sh/uv/)、Node.js（仅 Web 前端需要）
 
@@ -176,7 +176,7 @@ uv run python server.py
 uv run python file_upload_service.py
 ```
 
-## ⚙ 配置
+## 配置
 
 所有配置集中在 `config/` 目录的 YAML 文件中，且大部分可在 Web 设置面板中**热更新**：
 
@@ -195,7 +195,7 @@ uv run python file_upload_service.py
 
 > 设置面板：模型设置、工具管理、文件管理、系统提示词自定义；RAG 知识库支持拖拽上传 `.txt` / `.md` / `.docx` / 代码文件（支持格式可在 `RagConfig.yml` 的 `support_extensions` 配置），自动分块索引。
 
-## 🧪 测试
+## 测试
 
 ```bash
 uv run pytest tests/ -v
@@ -203,7 +203,7 @@ uv run pytest tests/ -v
 
 **176 个测试**覆盖：文件安全管线（路径穿越/黑名单/限额/审批流）、模型工厂（自定义 OpenAI 协议模型）、会话序列化与持久化、流式输出的历史清洗与反思触发、**反思笔记存储与 API**、**上传文件定时清理**、**聊天附件上传**、**todo 续跑 hook**。
 
-## 🛠 技术栈
+## 技术栈
 
 | 层 | 技术 |
 |---|---|
@@ -214,7 +214,7 @@ uv run pytest tests/ -v
 | 前端 | React 18 · TypeScript · Vite 6 · Tailwind CSS |
 | 工具链 | uv · pytest · loguru · Tavily |
 
-## 🗺 路线图
+## 路线图
 
 - [ ] 报告生成能力（`report_prompt` 已预留）
 - [ ] 前端国际化（`UIConfig` 已预留语言项）
